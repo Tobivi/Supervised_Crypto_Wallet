@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Supervised Crypto Wallet</title>
+	<style>
+		body {
+			background-color: #333;
+			color: #fff;
+			font-family: Arial, sans-serif;
+			margin: 0;
+			padding: 0;
+			box-sizing: border-box;
+		}
+
+		h1 {
+			color: #66c2ff;
+			text-align: center;
+		}
+
+		input[type='text'],
+		input[type='button'] {
+			padding: 10px;
+			margin: 5px;
+			margin-left: 20px;
+			border: none;
+			border-radius: 5px;
+			width: 150px;
+		}
+
+		input[type='text'] {
+			width: 70%;
+		}
+
+		input[type='text'] {
+			background-color: #444;
+			color: #fff;
+		}
+
+		input[type='button'] {
+			background-color: #66c2ff;
+			color: #333;
+			cursor: pointer;
+		}
+
+		#chatLog {
+			max-height: 20em;
+			/* Set the maximum height for the chat log */
+			overflow-y: auto;
+			/* Enable vertical scrollbar if the content overflows */
+			padding: 10px;
+			margin: 10px;
+			border: 1px solid #66c2ff;
+			border-radius: 5px;
+		}
+
+		.user {
+			background-color: #5588a3;
+			color: #fff;
+			padding: 5px;
+			padding-left: 15px;
+			margin-bottom: 5px;
+			border-radius: 5px;
+		}
+
+		.assistant {
+			background-color: #334455;
+			color: #fff;
+			padding: 5px;
+			padding-left: 15px;
+			margin-bottom: 5px;
+			border-radius: 5px;
+		}
+
+		#cryptoTransactionLog {
+			max-height: 20em;
+			/* Set the maximum height for the chat log */
+			overflow-y: auto;
+			/* Enable vertical scrollbar if the content overflows */
+			padding: 10px;
+			margin: 10px;
+			border: 1px solid #00db80;
+			border-radius: 5px;
+		}
+
+		.cryptoTransaction {
+			background-color: #555aa3;
+			color: #fff;
+			padding: 5px;
+			margin-bottom: 5px;
+			border-radius: 5px;
+		}
+
+		.cryptoTransaction a {
+			color: orange;
+		}
+
+		#wrapperDiv {
+			width: 90%;
+			min-width: 200px;
+			/* text-align: center; */
+			padding-left: 1%;
+		}
+
+		.balance-container {
+            text-align: center;
+			display: flex;
+			align-items: center;
+ 		 	justify-content: center;
+        }
+
+        .balance-amount {
+            font-size: 25px;
+            font-weight: bold;
+            color: #706c7d;
+            margin: 10px;
+        }
+
+		.MATIC { color: rgb(219, 219, 219); }
+
+		.ETH { color: rgb(155, 155, 230); }
+
+		.USD { color: green; }
+
+        .balance-label {
+            font-size: 30px;
+            color: #ffffff;
+			text-align: center;
+        }
+
+		
+		/* POPUP stuff */
+		.help-button {
+            background-color: #6C757D; /* Ethereum purple button color */
+            color: #FFFFFF; /* White text on the button */
+            border: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            margin: 20px;
+            border-radius: 5px;
+        }
+
+        .popup {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(108, 117, 125, 0.8); /* Ethereum purple background with opacity */
+            justify-content: center;
+            align-items: center;
+        }
+
+        .popup-content {
+            /* background-color: #947b7b; White background for popup */
+			background-color: rgb(108, 117, 125);
+            padding: 20px;
+            border-radius: 5px;
+            max-width: 400px;
+            text-align: center;
+        }
+
+        .close-button {
+            background-color: #000000; /* Ethereum purple button color */
+            color: #FFFFFF; /* White text on the button */
+            border: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 10px;
+            border-radius: 5px;
+        }
+
+
+		/* STATS POPUP */
+		.stats-popup {
+			display: none;
+			position: fixed;
+			top: 0;
+			left: 0;
+			width: 100%;
+			height: 100%;
+			background-color: rgba(0, 0, 0, 0.5);
+		}
+
+		.stats-popup-content {
+			position: absolute;
+			top: 50%;
+			left: 50%;
+			transform: translate(-50%, -50%);
+			background-color: rgba(45, 39, 109, 0.8);;
+			padding: 20px;
+			max-width: 80%;
+			max-height: 80%;
+			overflow-y: auto;
+			box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+		}
+
+		.stats-popup-close {
+			position: absolute;
+			top: 10px;
+			right: 10px;
+			font-size: 20px;
+			cursor: pointer;
+		}
+
+		.stats-table {
+			width: 100%;
+			border-collapse: collapse;
+			margin-top: 20px;
+		}
+
+		.stats-table th, .stats-table td {
+			border: 1px solid #ddd;
+			padding: 10px;
+			text-align: left;
+		}
+
+		.stats-table th {
+			background-color: rgba(45, 39, 109, 0.8);
+		}
+
+		.stats-popup button {
+			padding: 10px 20px;
+			margin: 10px;
+			font-size: 16px;
+			cursor: pointer;
+			background-color: #4CAF50;
+			color: #fff;
+			border: none;
+			border-radius: 4px;
+		}
+
+		.stats-popup button:hover {
+			background-color: #45a049;
+		}
+
+		.stats-popup-close {
+			position: absolute;
+			top: 10px;
+			right: 10px;
+			font-size: 30px;
+			cursor: pointer;
+			color: #555;
+		}
+	</style>
+
+	<script src="https://cdn.jsdelivr.net/npm/web3@latest/dist/web3.min.js"></script>
+	<script>
+		// get the user's account
+		async function getAcct() {
+			if (!window.ethereum) return alert("please install the meta mask extension!");
+
+			if (!localStorage.getItem('cryptoAcct')) {
+				const accounts = await window.ethereum.request({
+					method: 'eth_requestAccounts',
+					params: [] 
+				});
+
+				// console.log(accounts);
+				const account = accounts[0];
+				localStorage.setItem('cryptoAcct', account);
+			}
+
+			// const fromAddr = localStorage.getItem('cryptoAcct');
+			return localStorage.getItem('cryptoAcct')
+		}
+
+		// display the user's balances on the web page
+		async function initBals() {
+			const fromAddr = await getAcct();
+			const web3 = new Web3(window.ethereum);
+			const uBalInWei = await web3.eth.getBalance(fromAddr);
+
+			const ubalInMATIC = Number(uBalInWei) / 1000000000000000000;
+			const uBalInETH = parseFloat(await makeAPIRequest(ubalInMATIC, 'MATICtoETH'));
+			
+			const response = JSON.parse(await makeAPIRequest(0, 'getEthPrice'));
+
+			const uBalUSD = uBalInETH * parseFloat(response['ETHTOUSD']);
+			
+			document.getElementById('amtmatic').innerText = `${ubalInMATIC.toFixed(4)} MATIC`;
+			document.getElementById('amteth').innerText = `${uBalInETH} ETH`;
+			document.getElementById('amtusd').innerText = `${uBalUSD.toFixed(2)} USD`;
+		}
+
+
+		// send a crypto transaction if the AI deems it safe enough
+		async function sendTransaction() {
+			if (!window.ethereum) return alert("please install the meta mask extension!");
+
+			try {
+				const fromAddr = await getAcct();
+
+				if (!localStorage.getItem('ubd')) {
+					const uBDStr = prompt("Please enter your date of birth", "month/day/year");
+					const ubd = new Date(uBDStr);
+					localStorage.setItem('ubd', ubd.toString());
+				}
+				const uAge = (new Date()).getFullYear() - (new Date(localStorage.getItem('ubd'))).getFullYear();
+
+				// makeAPIRequest(fromAddr, 'getTransAmt')
+				const numTransHex = await window.ethereum.request({
+					method: 'eth_getTransactionCount',
+					params: [fromAddr] 
+				});
+				const numTrans = Number(numTransHex)
+
+				// hard-coded, change later
+				const toAddr = document.getElementById('cryptAddrDest').value;
+				if (!toAddr) return;
+
+				const amtUSD = document.getElementById('cryptinp').value;
+				if (isNaN(amtUSD)) return alert("please enter an amount!");
+
+				const response = JSON.parse(await makeAPIRequest(amtUSD, 'getEthPrice'));
+
+				// #region get timestamp
+
+				// get latest transaction
+				const latestReqHash = await makeAPIRequest(fromAddr, 'getLastTrans');
+				var timeDiffMins = 1;
+				
+				const latestReq = await window.ethereum.request({
+					"method": "eth_getTransactionByHash",
+					"params": [
+						latestReqHash
+					]
+				});
+
+				if (latestReq) {
+					const latestBlock = await window.ethereum.request({
+						"method": "eth_getBlockByHash",
+						"params": [
+							latestReq['blockHash'],
+							true  // hydrated?
+						]
+					});
+
+					const timestampSecHex = latestBlock['timestamp']
+					const timeSent = new Date((parseInt(timestampSecHex, 16) * 1000));  // .toLocaleString();
+					timeDiffMins = Math.floor(((new Date()) - timeSent) / 60000);
+				}
+				
+				// GET USER FUNDS IN WALLET
+				const web3 = new Web3(window.ethereum);
+				const uBalInWei = await web3.eth.getBalance(fromAddr);
+				const ubalInMATIC = Number(uBalInWei) / 1000000000000000000;
+
+				const uBalInETH = await makeAPIRequest(ubalInMATIC, 'MATICtoETH');
+
+				const weiAmt = Web3.utils.numberToHex(Web3.utils.toWei(Number(response['ETHAMT']).toString(), "ether"));
+
+				// check with the back end if allowed
+				const AIResponse = await makeAPIRequest([response['ETHAMT'], timeDiffMins, uBalInETH, uAge, numTrans], 'isExcess')
+				const transAuth = JSON.parse(AIResponse);
+
+				if (transAuth['code'] == 3 || transAuth['code'] == -1) return alert(transAuth['msg']);
+				alert(transAuth['msg']);
+				
+				if (!confirm(`are you sure you'd like to send $${amtUSD} (or ${weiAmt}) to ${toAddr}?`)) return;
+				const hex = (n) => Number(n).toString(16);
+				
+				const res = await window.ethereum.request({
+					method: 'eth_sendTransaction',
+					params: [
+						{
+							from: fromAddr,
+							to: toAddr,
+							// gas: "0x5028", //hex(1),
+							gasLimit: "0x5028", //hex(1),
+							maxPriorityFeePerGas: '0x3b9aca00',
+							maxFeePerGas: '0x2540be400',
+							value: weiAmt, // IN WEI
+						},
+					]
+				});
+
+				addToCryptoLog(res);
+				document.getElementById('cryptAddrDest').value = '';
+				document.getElementById('cryptinp').value = '';
+				document.getElementById('spendYourLifeAway').innerText = 'Send $0 of ETH';
+				initBals();
+				
+				// console.log(`your transaction has succeeded!\nCheck it out on https://mumbai.polygonscan.com/tx/${res}`);
+
+			} catch (error) {
+				console.log({ error });
+				alert("ERROR!");
+			}
+		}
+
+		
+		function addToCryptoLog(transHash) {
+			const log = document.getElementById('cryptoTransactionLog');
+			const toAdd = document.createElement('div');
+			toAdd.innerHTML = `your transaction suceeded!\nCheck it out <a href="https://mumbai.polygonscan.com/tx/${transHash}" target="_blank">here</a>`;
+			// https://sepolia.etherscan.io/tx
+			toAdd.classList.add("cryptoTransaction");
+			log.appendChild(toAdd);
+			toAdd.scrollIntoView();
+		}
+
+
+		function checkNum(ev) {
+			if ((isNaN(ev.key) || ev.key == ' ') && ev.key != '.' ) return false;
+			else if (ev.key == '.' && ev.target.value.indexOf('.') != -1) return false;
+
+			const btn = document.getElementById('spendYourLifeAway');
+
+			if (ev.target.value.length > 3) btn.value = `Buy $${ev.target.value.substr(0, 4)}... of ETH?`;
+			else btn.value = `Send $${ev.target.value + ev.key} of ETH`;
+
+			return true;
+		}
+
+		const dataObject = {};
+
+		async function openStatsPopup() {
+			var statsPopup = document.getElementById('statspopup');
+			var statsTable = document.getElementById('stats-table');
+
+			const addr = await getAcct();
+			const maps = JSON.parse(await makeAPIRequest(addr, 'getTransactions'));
+			// dataObject = {"IN": maps[0], "OUT": maps[1]};
+			dataObject["IN"] = maps[0];
+			dataObject["OUT"] = maps[1];
+
+			// Clear existing content
+			statsTable.innerHTML = '';
+
+			console.log(dataObject)
+			// Create a table header
+			var headerRow = statsTable.insertRow();
+			var headers = ["Direction", "Address", "Transaction Hash", "Block Number", "Timestamp", "Amount", "Fee", "Gas Price"];
+
+			headers.forEach(function(headerText) {
+				var th = document.createElement('th');
+				th.textContent = headerText;
+				headerRow.appendChild(th);
+			});
+
+			// Populate the table with data
+			for (var direction in dataObject) {
+				for (var address in dataObject[direction]) {
+				dataObject[direction][address].forEach(function(transaction) {
+						var row = statsTable.insertRow();
+						var values = [direction, address, transaction.transaction_hash, transaction.block_number, transaction.timestamp, transaction.amount, transaction.fee, transaction.gas_price];
+						// var values = [direction, address, "Transaction Hash", "Block Number", transaction.timestamp, transaction.amount, transaction.fee, transaction.gas_price];
+
+						values.forEach(function(value) {
+							var cell = row.insertCell();
+							cell.textContent = value;
+						});
+					});
+				}
+			}
+
+			// Show the stats popup
+			statsPopup.style.display = 'block';
+		}
+
+		// Function to close the stats popup
+		function closeStatsPopup() {
+			var statsPopup = document.getElementById('statspopup');
+			statsPopup.style.display = 'none';
+		}
+
+		var currentDisplay = 'original';
+
+		// Function to toggle between displays
+		function toggleDisplay() {
+			var statsTableContainer = document.getElementById('stats-table-container');
+			var addressStatsContainer = document.getElementById('address-stats-container');
+
+			if (currentDisplay === 'original') {
+				currentDisplay = 'addressStats';
+				statsTableContainer.style.display = 'none';
+				addressStatsContainer.style.display = 'block';
+			} else {
+				currentDisplay = 'original';
+				statsTableContainer.style.display = 'block';
+				addressStatsContainer.style.display = 'none';
+			}
+		}
+
+		// change the display from a transaction table to searching for an individual address
+		function toggleDisplay() {
+			var statsTableContainer = document.getElementById('stats-table-container');
+			var addressStatsContainer = document.getElementById('address-stats-container');
+
+			if (currentDisplay === 'original') {
+				currentDisplay = 'addressStats';
+				statsTableContainer.style.display = 'none';
+				addressStatsContainer.style.display = 'block';
+			} else {
+				currentDisplay = 'original';
+				statsTableContainer.style.display = 'block';
+				addressStatsContainer.style.display = 'none';
+			}
+		}
+
+		// Function to show the number of times an address has sent and received transactions
+		function showAddressStats() {
+			var addressInput = document.getElementById('addressInput').value;
+			var addressStats = document.getElementById('addressStats');
+
+			var recCount = 0;
+			var sentCount = 0;
+
+			for (var direction in dataObject) {
+				for (var address in dataObject[direction]) {
+					if (address === addressInput) {
+					if (direction === 'IN') {
+						recCount += dataObject[direction][address].length;
+					} else if (direction === 'OUT') {
+						sentCount += dataObject[direction][address].length;
+					}
+					}
+				}
+			}
+
+			addressStats.textContent = `You have sent ${sentCount} transaction${(sentCount != 1) ? 's' : ''} to and received ${recCount} transaction${(recCount != 1) ? 's' : ''} from ${addressInput}.`;
+		}
+
+		// document.addEventListener('DOMContentLoaded', function() {
+		// 	openPopup();
+		// });
+	</script>
+
+	<script>
+		// Variable to store conversation history
+		let chatHistory = [];
+
+		// custom function to make pinging the back end easy
+		function makeAPIRequest(content, relativePath) {
+			return new Promise((resolve, reject) => {
+				try {
+					const chatId = localStorage.getItem("chatID");
+					if (!chatId) return alert("please refresh window");
+
+					var req = new XMLHttpRequest();
+					req.open('POST', `${window.location.origin}/${relativePath}`);
+					req.setRequestHeader('chatid', chatId);
+					req.onloadend = (ev) => {
+						resolve(req.response);
+					}
+					req.send(content);
+				}
+				catch (err) {
+					reject(err);
+				}
+			})
+		}
+
+		// call the Chat API for the back end
+		async function callAPI() {
+			// Get the input value
+			const inputElement = document.getElementById('content');
+			const userInput = String(inputElement.value);
+
+			if (!userInput) return alert("please provide input!");
+
+			// Add user's message to the chat history
+			chatHistory.push({ role: 'user', content: userInput });
+
+			// Clear the input field
+			inputElement.value = '';
+
+			// Add user's message to the chat log
+			updateChatLog();
+
+			// API call/add API response to the chat history
+			try {
+				const uresp = await makeAPIRequest(userInput, 'callAPI')
+				chatHistory.push({ role: 'assistant', content: uresp });
+				updateChatLog();
+			}
+			catch (err) {
+				console.error(err);
+				alert("interaction failed!");
+			}
+
+			// Add API response to the chat log
+			updateChatLog();
+		}
+
+		// create a new conversation
+		async function initConvo() {
+			// load chat history
+			var chatID = window.localStorage.getItem('chatID') || undefined;
+			if (!chatID) chatID = crypto.randomUUID();
+			localStorage.setItem("chatID", chatID);
+
+			const convo = await makeAPIRequest(chatID, 'initChat');
+			if (!convo) return;
+
+			// remove the initial response
+			chatHistory = Array.from(JSON.parse(convo)).filter((m) => m.role != "system");
+			// console.log(chatHistory);
+			updateChatLog();
+		}
+
+		// update the AI chat log on the web-page
+		function updateChatLog() {
+			// Get the chat log element
+			const chatLogElement = document.getElementById('chatLog');
+
+			// Clear the chat log
+			chatLogElement.innerHTML = '';
+
+			// Update the chat log with the conversation history
+			chatHistory.forEach(message => {
+				const messageElement = document.createElement('div');
+				messageElement.classList.add(message.role);
+				messageElement.textContent = message.content;
+				chatLogElement.appendChild(messageElement);
+				messageElement.scrollIntoView();
+			});
+		}
+
+		function openPopup() {
+            document.getElementById('helpPopup').style.display = 'flex';
+        }
+
+        function closePopup() {
+            document.getElementById('helpPopup').style.display = 'none';
+        }
+
+
+		initConvo();
+		initBals();
+	</script>
+</head>
+
+<body>
+	<div id="wrapperDiv">
+		<h1>Supervised Crypto Wallet</h1>
+
+		<div style="text-align: center; /* position: fixed; bottom: 10%; left: 0; right: 0; */">
+			<button class="help-button" onclick="openPopup()">Help</button>
+			<button class="help-button" onclick="openStatsPopup()">Statistics</button>
+		</div>
+		
+		<hr>
+		<div>
+			<div class="balance-label">AI Chat</div>
+			<div id='chatLog'></div>
+			<input type='text' name='content' id='content' placeholder='Enter a message'>
+			<input type='button' value='Send Message' id='callApiButton' onclick="callAPI()">
+		</div>
+
+		<hr>
+		<!-- <button onclick="addToCryptoLog('0xf3e614ce391e95da928d13640e554ba0cd028f03a9736caa0065f165ecb7a72e')">FDKJHKDJFHKDSJ</button> -->
+		<div style="text-align: center;">
+			<div class="balance-label">Current Balances</div>
+			<div class="balance-container">
+				<div id="amtmatic" class="balance-amount MATIC">0 MATIC</div>
+				<div id="amteth" class="balance-amount ETH">0 ETH</div>
+				<div id="amtusd" class="balance-amount USD">0 USD</div>
+			</div>
+		</div>
+		
+		<div style="display: flex;">
+			<div style="width: 70%;">
+			  <input name="cryptinp" id="cryptinp" type="text" placeholder="amount in USD" onkeypress="return checkNum(event)"/>
+			  <input name="cryptAddrDest" id="cryptAddrDest" type="text" placeholder="Destination Address"/>
+			  <input type="button" value='Send $0 of ETH' id='spendYourLifeAway' onclick="return sendTransaction(event)">
+			</div>
+			
+			<div id='cryptoTransactionLog' style="width: 50%;"></div>
+		</div>
+
+		<!-- POP-UPS -->
+		<div class="popup" id="helpPopup">
+			<div class="popup-content">
+				<h1 style="color: white; margin-top: 0px;">HELP</h1>
+				<p>Enter a message to ask your AI helper any questions you may have</p>
+				<p>To send crypto, enter the amount in USD, then enter the destination address and click the send button</p>
+				<p>To see statistics about your spending, click <a style="text-decoration: underline; cursor: pointer;" onclick="javascript:(function() { closePopup(); openStatsPopup() })()">Statistics</a></p>
+				<p><i>Your transactions are run past an AI which categorizes them based on things like history and current balance help you balance your spending habits</i></p>
+				<button class="close-button" onclick="closePopup()">Close</button>
+			</div>
+		</div>
+
+
+		<div id="statspopup" class="stats-popup" style="display:none;">
+			<div class="stats-popup-content">
+				<span class="stats-popup-close" onclick="closeStatsPopup()">&times;</span>
+				<button onclick="toggleDisplay()">Toggle Display</button>
+				<div id="stats-table-container">
+					<table id="stats-table" border="1"></table>
+				</div>
+				<div id="address-stats-container" style="display:none;">
+					<label for="addressInput">Enter Address:</label>
+					<input type="text" id="addressInput">
+					<button onclick="showAddressStats()">Show Address Stats</button>
+					<p id="addressStats"></p>
+				</div>
+			</div>
+		</div>
+	</div>
+</body>
+
+</html>
